@@ -1,0 +1,23 @@
+version: 0.2
+
+env:
+  variables:
+    TAG_NAME: latest
+
+phases:
+  install:
+    runtime-versions:
+      docker: 19
+
+  pre_build:
+    commands:
+      - $(aws ecr get-login --no-include-email)
+      - docker pull $CONTAINER_REPOSITORY_URL:$TAG_NAME || true
+
+  build:
+    commands:
+      - docker build --cache-from $CONTAINER_REPOSITORY_URL:$TAG_NAME --tag $CONTAINER_REPOSITORY_URL:$TAG_NAME .
+
+  post_build:
+    commands:
+      - docker push $CONTAINER_REPOSITORY_URL
